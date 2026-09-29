@@ -1,0 +1,15 @@
+The host integrates the product through Webpack Module Federation. The host and product remote are separate applications; the host doesn’t copy the product component into its source code.
+
+The remote publishes the component. In product-remote/webpack.config.js, the remote is named productRemote and exposes ./ProductList, which points to its local component file. Webpack generates remoteEntry.js as the remote’s runtime entry point.
+
+The host knows where to find it. In host/webpack.config.js, remotes maps the name productRemote to http://localhost:3001/remoteEntry.js. That lets Webpack understand the host’s import prefix productRemote/....
+
+The host requests it lazily. In host/src/App.tsx, React.lazy(() => import("productRemote/ProductList")) tells React to load the component when it is needed. Suspense displays “Loading products...” while that request is pending.
+
+The browser loads the remote code at runtime. Webpack fetches remoteEntry.js, asks the productRemote container for its exposed ./ProductList module, then fetches the JavaScript chunk containing the component. React renders that component inside the host’s page.
+
+React is shared between the apps. Both Webpack configs list React and ReactDOM as shared singletons. This helps the host and remote use one compatible React instance, which is important for hooks and rendering.
+
+The declaration in host/src/types.d.ts only tells TypeScript what productRemote/ProductList exports. It does not fetch the remote; fetching happens in the browser at runtime.
+
+If the remote can’t be loaded or the component fails to render, the host’s error boundary displays “Product service is currently unavailable.”

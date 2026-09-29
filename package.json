@@ -1,0 +1,10 @@
+{
+  "name": "microfrontend-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start:host": "npm run start --prefix host",
+    "start:remote": "npm run start --prefix product-remote",
+    "build": "npm run build --prefix product-remote && npm run build --prefix host"
+  }
+}
